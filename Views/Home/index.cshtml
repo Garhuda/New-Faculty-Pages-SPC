@@ -1,3 +1,9 @@
+@model IEnumerable<SPC_Faculty_Pages.Models.Database.Faculty>
+
+@{
+    Layout = "_layout";
+}
+
 <html lang="en">
     <head>
         <meta charset="UTF-8">
@@ -27,7 +33,7 @@
                     <h2>All State Center</h2>
                 </a>
 
-                <a class="campus-card" asp-controller="Home" asp-action="FacultyProfile">
+                <a class="campus-card" asp-controller="Home" asp-action="FacultyList">
                     <div class="campus-image">Campus Image</div>
                     <h2>Clearwater</h2>
                 </a>

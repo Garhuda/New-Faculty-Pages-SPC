@@ -1,3 +1,10 @@
+@model IEnumerable<SPC_Faculty_Pages.Models.Database.Faculty>
+
+@{
+    Layout = "_layout";
+}
+
+
 <html lang="en">
     <head>
         <meta charset="UTF-8">
@@ -22,8 +29,7 @@
                 <div class="instructor-photo">Instructor Image</div>
                 <div>
                     <p>Clearwater Campus - College of Computer and Information Technology</p>
-                    <h1>Dawn Ellis</h1>
-                    <p>Faculty</p>
+                    <h1>Dawn Ellis</h1>  @Html.DisplayNameFor(model => model.FirstName)
                     <p>Office: ES 213B</p>
                     <p>Email: <a href="mailto:ellis.dawn@spcollege.edu">ellis.dawn@spcollege.edu</a></p>
                     <p>Phone: (727) 614-7025</p>

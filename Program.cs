@@ -1,7 +1,16 @@
+using Microsoft.EntityFrameworkCore;
+using SPC_Faculty_Pages.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddDbContext<FacultyDbContext>(options =>
+    options.UseMySQL(
+        builder.Configuration.GetConnectionString("SPC-Faculty-Pages")
+        ?? throw new InvalidOperationException("Missing SPC-Faculty-Pages connection string.")));
+
 
 var app = builder.Build();
 

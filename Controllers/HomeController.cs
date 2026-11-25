@@ -1,9 +1,7 @@
-using System.Diagnostics;
-using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Mvc;
-using SPC_Faculty_Pages.Models;
+using Microsoft.EntityFrameworkCore;
+using SPC_Faculty_Pages.Data;
 using MySqlConnector;
-
 
 namespace SPC_Faculty_Pages.Controllers;
 
@@ -11,9 +9,17 @@ public class HomeController : Controller
 {
     private readonly IConfiguration _configuration;
 
-    public HomeController(IConfiguration configuration)
+    private readonly FacultyDbContext _db;
+    public HomeController(IConfiguration configuration, FacultyDbContext db)
     {
         _configuration = configuration;
+        _db = db;
+    }
+
+    public async Task<IActionResult> FacultyProfile()
+    {
+        var faculty = await _db.Faculties.AsNoTracking().ToListAsync();
+        return View("faculty_profile", faculty);
     }
 
     public IActionResult Index()
@@ -21,28 +27,14 @@ public class HomeController : Controller
         return View();
     }
 
-    public IActionResult FacultyProfile()
+    public async Task<IActionResult> FacultyList()
     {
-        return View("faculty_profile");
+         var faculty = await _db.Faculties.AsNoTracking().ToListAsync();
+        return View("~/Views/ClearwaterCampus/FacultyList.cshtml", faculty);
     }
 
     public IActionResult FacultyInformationCollection()
     {
         return View("faculty_information_collection");
-    }
-
-    public async Task<IActionResult> TestDatabase()
-    {
-        var connectionString =
-            _configuration.GetConnectionString("SPC-Faculty-Pages")
-            ?? throw new InvalidOperationException("MySQL connection string is missing.");
-
-        await using var connection = new MySqlConnection(connectionString);
-        await connection.OpenAsync();
-
-        await using var command = new MySqlCommand("SELECT 1", connection);
-        var result = await command.ExecuteScalarAsync();
-
-        return Content($"Connected; SELECT 1 returned {result}.");
     }
 }
