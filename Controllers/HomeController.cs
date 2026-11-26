@@ -66,6 +66,30 @@ public class HomeController : Controller
         return View("~/Views/CampusFaculty/FacultyListSC.cshtml", faculty);
     }
 
+    public async Task<IActionResult> FacultyListEP()
+    {
+        var faculty = await _db.Faculties.AsNoTracking()
+            .Where(f => f.OfficeLocation == "Epicenter")
+            .ToListAsync();
+        return View("~/Views/CampusFaculty/FacultyListSC.cshtml", faculty);
+    }
+
+    public async Task<IActionResult> FacultyListGB()
+    {
+        var faculty = await _db.Faculties.AsNoTracking()
+            .Where(f => f.OfficeLocation == "Gibbs Campus")
+            .ToListAsync();
+        return View("~/Views/CampusFaculty/FacultyListSC.cshtml", faculty);
+    }
+
+    public async Task<IActionResult> FacultyListTP()
+    {
+        var faculty = await _db.Faculties.AsNoTracking()
+            .Where(f => f.OfficeLocation == "Tarpon Campus")
+            .ToListAsync();
+        return View("~/Views/CampusFaculty/FacultyListSC.cshtml", faculty);
+    }
+
     public IActionResult FacultyInformationCollection()
     {
         return View("faculty_information_collection");
