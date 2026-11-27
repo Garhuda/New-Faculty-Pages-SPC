@@ -1,4 +1,4 @@
-@model IEnumerable<SPC_Faculty_Pages.Models.Database.Faculty>
+@model SPC_Faculty_Pages.Models.Database.Faculty
 
 @{
     Layout = "_layout";
@@ -9,7 +9,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Faculty Profile - Dawn Ellis</title>
+        <title>Faculty Profile - @Model.FirstName @Model.LastName</title>
         <link rel="stylesheet" href="~/css/site.css" asp-append-version="true">
     </head>
     <body>
@@ -17,9 +17,10 @@
             <div class="header-content">
                 <p class="school-name">College Faculty Directory</p>
                 <nav>
-                    <a asp-controller="Home" asp-action="Index">Faculty Profiles</a>
-                    <a asp-controller="Home" asp-action="FacultyProfile" aria-current="page">Instructor Profile</a>
-                    <a asp-controller="Home" asp-action="FacultyInformationCollection">Edit Profile</a>
+                    <a asp-controller="Home" asp-action="Index">Campus Selection</a>
+                    <a asp-controller="Home"
+                       asp-action="FacultyInformationCollection"
+                       asp-route-id="@Model.FacultyId">Edit Profile</a>
                 </nav>
             </div>
         </header>
@@ -28,28 +29,38 @@
             <section class="profile-top">
                 <div class="instructor-photo">Instructor Image</div>
                 <div>
-                    <p>Clearwater Campus - College of Computer and Information Technology</p>
-                    <h1>Dawn Ellis</h1>  @Html.DisplayNameFor(model => model.FirstName)
-                    <p>Office: ES 213B</p>
-                    <p>Email: <a href="mailto:ellis.dawn@spcollege.edu">ellis.dawn@spcollege.edu</a></p>
-                    <p>Phone: (727) 614-7025</p>
+                    <p>@(string.IsNullOrWhiteSpace(Model.OfficeLocation) ? "Campus not listed" : Model.OfficeLocation) - @Model.Department.DepartmentName</p>
+                    <h1>@Model.FirstName @Model.LastName</h1>
+                    <p>Office: @(string.IsNullOrWhiteSpace(Model.OfficeLocation) ? "Not listed" : Model.OfficeLocation)</p>
+                    <p>Email: <a href="mailto:@Model.Email">@Model.Email</a></p>
+                    <p>Phone: @(string.IsNullOrWhiteSpace(Model.Phone) ? "Not listed" : Model.Phone)</p>
                 </div>
             </section>
 
             <section class="biography">
                 <h2>Biography</h2>
                 <p>
-                    Add a brief biography for the instructor here. 
+                    @(string.IsNullOrWhiteSpace(Model.Biography) ? "Biography not available." : Model.Biography)
                 </p>
             </section>
 
             <section class="enrollments">
                 <h2>Enrollments</h2>
                 <ul class="course-list">
-                    <li><strong>COP 1000</strong><span>Introduction to Programming</span></li>
-                    <li><strong>COP 2000</strong><span>Programming Concepts</span></li>
-                    <li><strong>CTS 2001</strong><span>Computer and Network Fundamentals</span></li>
-                    <li><strong>CGS 1000</strong><span>Computer Information Systems</span></li>
+                    @if (Model.Facultycourses.Any())
+                    {
+                        @foreach (var enrollment in Model.Facultycourses.OrderBy(fc => fc.Course.CourseCode))
+                        {
+                            <li>
+                                <strong>@enrollment.Course.CourseCode</strong>
+                                <span>@enrollment.Course.CourseTitle @(enrollment.Term == null ? "" : $"({enrollment.Term})")</span>
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        <li><span>No courses assigned.</span></li>
+                    }
                 </ul>
             </section>
             <p class="back-link"><a asp-controller="Home" asp-action="Index">← Back to Faculty Profiles</a></p>

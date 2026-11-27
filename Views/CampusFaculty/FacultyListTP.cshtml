@@ -13,7 +13,7 @@
 </head>
 <body>
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-controller="Home" asp-action="FacultyInformationCollection" asp-route-id="0" asp-route-campus="Tarpon Campus">Create New</a>
 </p>
 <table class="table table-striped table-bordered table-hover">
     <thead>
@@ -35,7 +35,8 @@
     </thead>
     <tbody>
 @foreach (var item in Model) {
-        <tr>
+        <tr class="faculty-row" onclick="window.location.href='@Url.Action("FacultyProfile", "Home", new { id = item.FacultyId })'" tabindex="0"
+            onkeydown="if(event.key==='Enter'||event.key===' ') window.location.href='@Url.Action("FacultyProfile", "Home", new { id = item.FacultyId })'">
             <td>
                 @Html.DisplayFor(modelItem => item.FirstName)
             </td>

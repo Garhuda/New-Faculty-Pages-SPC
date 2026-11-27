@@ -1,4 +1,4 @@
-@model IEnumerable<SPC_Faculty_Pages.Models.Database.Faculty>
+@model SPC_Faculty_Pages.Models.Database.Faculty
 
 @{
     Layout = "_layout";
@@ -17,62 +17,117 @@
             <div class="header-content">
                 <p class="school-name">College Faculty Directory</p>
                 <nav aria-label="Main navigation">
-                    <a asp-controller="Home" asp-action="Index">Faculty Profiles</a>
-                    <a asp-controller="Home" asp-action="FacultyProfile">Instructor Profile</a>
+                    <a asp-controller="Home" asp-action="Index">Campus Selection</a>
                     <a asp-controller="Home" asp-action="FacultyInformationCollection" aria-current="page">Edit Profile</a>
                 </nav>
             </div>
         </header>
         <main class="profile-page">
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success">@TempData["Success"]</div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger">@TempData["Error"]</div>
+            }
+
+            <section class="faculty-selector">
+                <label for="faculty-selector">Select faculty to edit:</label>
+                <select id="faculty-selector" onchange="window.location.href='@Url.Action("FacultyInformationCollection", "Home")?id=' + this.value">
+                    <option value="0">-- New Faculty --</option>
+                    @foreach (var faculty in (IEnumerable<SPC_Faculty_Pages.Models.Database.Faculty>)ViewBag.FacultyList)
+                    {
+                        <option value="@faculty.FacultyId" selected="@(faculty.FacultyId == Model.FacultyId)">
+                            @faculty.FirstName @faculty.LastName
+                        </option>
+                    }
+                </select>
+            </section>
+
              <section class="profile-top">
                 <div>
                     <div class="instructor-photo">Instructor Image</div>
-                    <input type="file" class="photo-upload" id="photo-upload" name="photo-upload" accept="image/*">
                 </div>
                 <div>
-                    <form class="info-form">
-                        <label for="campus">Campus:</label>
-                        <select id="campus" name="campus">
-                            <option value="all-state-center">All State Center</option>
-                            <option value="clearwater">Clearwater</option>
-                            <option value="downtown">Downtown</option>
+                    <form asp-action="SaveFaculty" method="post" class="info-form">
+                        @Html.AntiForgeryToken()
+                        <input asp-for="FacultyId" type="hidden" />
+
+                        <label asp-for="DepartmentId">Department:</label>
+                        <select asp-for="DepartmentId">
+                            <option value="">-- Select department --</option>
+                            @foreach (var department in (IEnumerable<SPC_Faculty_Pages.Models.Database.Department>)ViewBag.Departments)
+                            {
+                                <option value="@department.DepartmentId">@department.DepartmentName</option>
+                            }
                         </select>
-                        <label for="department">Department:</label>
-                        <select id="department" name="department">
-                            <option value="computer-science">Computer Science</option>
-                            <option value="information-technology">Information Technology</option>
-                            <option value="networking">Networking</option>
-                        </select>
-                        <label for="instructor">Instructor:</label>
-                        <input type="text" id="instructor" name="instructor" placeholder="Enter instructor name">
-                        <label for="office">Office:</label>
-                        <input type="text" id="office" name="office" placeholder="Enter office location">
-                        <label for="email">Email:</label>
-                        <input type="email" id="email" name="email" placeholder="Enter email address">
-                        <label for="phone">Phone:</label>
-                        <input type="tel" id="phone" name="phone" placeholder="Enter phone number">
-                        <button type="submit">Update Information</button>
+                        <label asp-for="FirstName">First name:</label>
+                        <input asp-for="FirstName" required placeholder="Enter first name">
+                        <label asp-for="LastName">Last name:</label>
+                        <input asp-for="LastName" required placeholder="Enter last name">
+                        <label asp-for="OfficeLocation">Campus / office:</label>
+                        <input asp-for="OfficeLocation" placeholder="Enter campus or office">
+                        <label asp-for="Email">Email:</label>
+                        <input asp-for="Email" type="email" required placeholder="Enter email address">
+                        <label asp-for="Phone">Phone:</label>
+                        <input asp-for="Phone" type="tel" placeholder="Enter phone number">
+                        <label asp-for="Biography">Biography:</label>
+                        <textarea asp-for="Biography" rows="6" placeholder="Enter instructor biography"></textarea>
+                        <div class="form-actions">
+                            <button type="submit">@(Model.FacultyId == 0 ? "Create Faculty" : "Update Faculty")</button>
+                            @if (Model.FacultyId > 0)
+                            {
+                                <input type="hidden" name="facultyId" value="@Model.FacultyId" />
+                                <button type="submit"
+                                        formaction="@Url.Action("DeleteFaculty", "Home")"
+                                        onclick="return confirm('Delete this faculty record?');"
+                                        class="danger-button">
+                                    Delete Faculty
+                                </button>
+                            }
+                        </div>
                     </form>
                 </div>
             </section>
 
-            <section class="biography">
-                <form class="info-form">
-                    <label for="biography">Biography:</label>
-                    <textarea id="biography" name="biography" placeholder="Enter instructor biography"></textarea>
-                    <button type="submit">Update Biography</button>
-                </form>
-            </section>
+            @if (Model.FacultyId > 0)
+            {
+                <section class="enrollments">
+                    <h2>Assigned Courses</h2>
+                    <form asp-action="AddFacultyCourse" method="post" class="course-form">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="facultyId" value="@Model.FacultyId" />
+                        <label for="courseId">Course:</label>
+                        <select id="courseId" name="courseId" required>
+                            <option value="">-- Select course --</option>
+                            @foreach (var course in (IEnumerable<SPC_Faculty_Pages.Models.Database.Course>)ViewBag.Courses)
+                            {
+                                <option value="@course.CourseId">@course.CourseCode - @course.CourseTitle</option>
+                            }
+                        </select>
+                        <label for="term">Term:</label>
+                        <input id="term" name="term" placeholder="Optional term" />
+                        <button type="submit">Add Course</button>
+                    </form>
 
-            <section class="enrollments">
-                <h2>Enrollments</h2>
-                <ul class="course-list">
-                    <li><strong>COP 1000</strong><span>Introduction to Programming</span></li>
-                    <li><strong>COP 2000</strong><span>Programming Concepts</span></li>
-                    <li><strong>CTS 2001</strong><span>Computer and Network Fundamentals</span></li>
-                    <li><strong>CGS 1000</strong><span>Computer Information Systems</span></li>
-                </ul>
-            </section>
+                    <ul class="course-list">
+                        @foreach (var enrollment in Model.Facultycourses.OrderBy(fc => fc.Course.CourseCode))
+                        {
+                            <li>
+                                <strong>@enrollment.Course.CourseCode</strong>
+                                <span>@enrollment.Course.CourseTitle @(enrollment.Term == null ? "" : $"({enrollment.Term})")</span>
+                                <form asp-action="RemoveFacultyCourse" method="post" class="remove-course">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="facultyId" value="@Model.FacultyId" />
+                                    <input type="hidden" name="courseId" value="@enrollment.CourseId" />
+                                    <button type="submit">Remove</button>
+                                </form>
+                            </li>
+                        }
+                    </ul>
+                </section>
+            }
             <p class="back-link"><a asp-controller="Home" asp-action="Index">← Back to Faculty Profiles</a></p>
         </main>
     </body>
